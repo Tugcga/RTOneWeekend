@@ -1,5 +1,6 @@
 import math
 import random
+import time
 from multiprocessing import Pool
 
 
@@ -371,7 +372,9 @@ def render_pixel(data):
 
 
 if __name__ == "__main__":
-    use_pool = False
+    start_time = time.time()
+
+    use_pool = True
     aspect_ratio = 16 / 9
     image_width = 340
     image_height = int(image_width / aspect_ratio)
@@ -420,6 +423,8 @@ if __name__ == "__main__":
                   "camera": camera,
                   "max_depth": max_depth}) for j in range(image_height - 1, -1, -1) for i in range(image_width)]
 
+    end_time = time.time()
+
     # write output file
     with open("image.ppm", "w") as file:
         file.write("P3\n")
@@ -427,3 +432,5 @@ if __name__ == "__main__":
         file.write("255\n")
         for pixel in pixels:
             file.write(" ".join([str(v) for v in color_to_RGB(pixel)]) + "\n")
+
+    print("Render time: " + str(end_time - start_time) + " seconds")
