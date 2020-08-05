@@ -371,6 +371,7 @@ def render_pixel(data):
 
 
 if __name__ == "__main__":
+    use_pool = False
     aspect_ratio = 16 / 9
     image_width = 340
     image_height = int(image_width / aspect_ratio)
@@ -396,18 +397,28 @@ if __name__ == "__main__":
     world.add(Sphere(Point3(1, 0, -1), -0.45, Dielectric(1.5)))
     world.add(Sphere(Point3(-1, 0, -1), 0.5, Metal(Color(0.8, 0.8, 0.8), 1.0)))
 
-    # prepare tasks for multiprocess rendering
-    tasks = [{"coord": (i, j),
-              "samples": samples,
-              "image_width": image_width,
-              "image_height": image_height,
-              "world": world,
-              "camera": camera,
-              "max_depth": max_depth} for j in range(image_height - 1, -1, -1) for i in range(image_width)]
+    if use_pool:
+        # prepare tasks for multiprocess rendering
+        tasks = [{"coord": (i, j),
+                  "samples": samples,
+                  "image_width": image_width,
+                  "image_height": image_height,
+                  "world": world,
+                  "camera": camera,
+                  "max_depth": max_depth} for j in range(image_height - 1, -1, -1) for i in range(image_width)]
 
-    # run multiplrocess
-    with Pool(8) as render_pool:
-        pixels = render_pool.map(render_pixel, tasks)
+        # run multiplrocess
+        with Pool(8) as render_pool:
+            pixels = render_pool.map(render_pixel, tasks)
+    else:
+        pixels = [render_pixel(
+                 {"coord": (i, j),
+                  "samples": samples,
+                  "image_width": image_width,
+                  "image_height": image_height,
+                  "world": world,
+                  "camera": camera,
+                  "max_depth": max_depth}) for j in range(image_height - 1, -1, -1) for i in range(image_width)]
 
     # write output file
     with open("image.ppm", "w") as file:
