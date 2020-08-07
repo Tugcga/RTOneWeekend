@@ -371,7 +371,33 @@ def render_pixel(data):
     return pixel / data["samples"]
 
 
-if __name__ == "__main__":
+def format_time(time):
+    '''
+    https://stackoverflow.com/a/24542445
+    '''
+    intervals = (
+                ("weeks", 604800),  # 60 * 60 * 24 * 7
+                ("days", 86400),    # 60 * 60 * 24
+                ("hours", 3600),    # 60 * 60
+                ("minutes", 60),
+                ("seconds", 1),
+                )
+    result = []
+    seconds = int(time)
+    milliseconds = int((time % 1) * 1000)
+
+    for name, count in intervals:
+        value = seconds // count
+        if value:
+            seconds -= value * count
+            if value == 1:
+                name = name.rstrip('s')
+            result.append("{} {}".format(value, name))
+    result.append("{} {}".format(milliseconds, "milliseconds"))
+    return ', '.join(result)
+
+
+def main():
     start_time = time.time()
 
     use_pool = True
@@ -433,4 +459,8 @@ if __name__ == "__main__":
         for pixel in pixels:
             file.write(" ".join([str(v) for v in color_to_RGB(pixel)]) + "\n")
 
-    print("Render time: " + str(end_time - start_time) + " seconds")
+    print("Render time: " + format_time(end_time - start_time))
+
+
+if __name__ == "__main__":
+    main()
